@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RawDataProcessor", "RawDataProcessor\RawDataProcessor.csproj", "{823020B3-006C-4D52-9C82-EDCB7D372656}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{823020B3-006C-4D52-9C82-EDCB7D372656}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{823020B3-006C-4D52-9C82-EDCB7D372656}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{823020B3-006C-4D52-9C82-EDCB7D372656}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{823020B3-006C-4D52-9C82-EDCB7D372656}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {204E34B2-3383-4B9C-84BC-B8174628C389}
+	EndGlobalSection
+EndGlobal
