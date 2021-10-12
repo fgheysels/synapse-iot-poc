@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace RawDataProcessor
                 foreach (var dayTelemetry in dateGroups)
                 {
                     var stream = CreateParquetContentForGroup(dayTelemetry);
-                    yield return new ParquetContent($"telemetry_{deviceTelemetry.Key}_{dayTelemetry.Key}.parquet", stream);
+                    yield return new ParquetContent($"device={deviceTelemetry.Key}/telemetry_{deviceTelemetry.Key}_{dayTelemetry.Key}_{DateTime.UtcNow.ToString("yyyyMMddTHHmm")}.parquet", stream);
                 }
             }
         }

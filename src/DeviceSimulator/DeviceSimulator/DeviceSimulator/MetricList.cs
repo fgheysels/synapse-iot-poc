@@ -31,7 +31,8 @@ namespace DeviceSimulator
             new TagDefinition("flux", 0.5, 4.5),
             new TagDefinition("current", 0, 3.5),
             new TagDefinition("voltage", 0, 110),
-            new TagDefinition("voltage", 0, 110)
+            new TagDefinition("ph", 4, 12),
+            new TagDefinition("lumen", 200, 3000)
         };
 
         private static readonly Random Randomizer = new Random();
