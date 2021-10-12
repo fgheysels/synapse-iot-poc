@@ -34,18 +34,15 @@ namespace RawDataProcessor
 
                 string query = "SELECT * \n" +
                                "FROM telemetrydata \n" +
-                               "WHERE YEAR >= @p_Year AND Month >= @p_Month AND Day >= @p_Day \n" +
-                               "AND Hour >= @p_Hour AND Minute >= @p_Minute \n" +
+                               "WHERE year >= @p_Year AND month= @p_Month AND date >= @p_Date \n" +
                                "AND JSON_VALUE(doc, '$.EnqueuedTimeUtc') > @p_LastRunDate \n" +
                                "ORDER BY JSON_VALUE(doc, '$.EnqueuedTimeUtc')";
 
                 var command = new SqlCommand(query);
                 command.Connection = connection;
                 command.Parameters.Add("@p_Year", SqlDbType.Int).Value = fromDate.Year;
-                command.Parameters.Add("@p_Month", SqlDbType.Int).Value = fromDate.Month;
-                command.Parameters.Add("@p_Day", SqlDbType.Int).Value = fromDate.Day;
-                command.Parameters.Add("@p_Hour", SqlDbType.Int).Value = fromDate.Hour;
-                command.Parameters.Add("@p_Minute", SqlDbType.Int).Value = fromDate.Minute;
+                command.Parameters.Add("@p_Month", SqlDbType.Int).Value = Convert.ToInt32(fromDate.ToString("yyyyMM"));
+                command.Parameters.Add("@p_Date", SqlDbType.Date).Value = fromDate.Date;
                 command.Parameters.Add("@p_LastRunDate", SqlDbType.DateTimeOffset).Value = fromDate;
 
                 using (var reader = await command.ExecuteReaderAsync())
