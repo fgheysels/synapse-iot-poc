@@ -10,7 +10,13 @@ namespace RawDataProcessor
 {
     public class Settings
     {
-        public DateTimeOffset LastRunDate { get; set; }
+        private static readonly string ConfigurationContainerName = "rawdataprocessor-configuration";
+        private static readonly string SettingsFileName = "settings.json";
+
+        /// <summary>
+        /// Gets the date/time of the last processed telemetry-item.
+        /// </summary>
+        public DateTimeOffset LastProcessingDate { get; set; }
 
         public static async Task<Settings> GetSettingsAsync(string storageConnectionString)
         {
@@ -18,10 +24,10 @@ namespace RawDataProcessor
 
             var blobClient = storageAccount.CreateCloudBlobClient();
 
-            var container = blobClient.GetContainerReference("rawdataprocessor-configuration");
+            var container = blobClient.GetContainerReference(ConfigurationContainerName);
 
             await container.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
-            var blob = container.GetBlobReference("settings.json");
+            var blob = container.GetBlobReference(SettingsFileName);
 
             if (await blob.ExistsAsync())
             {
@@ -37,27 +43,25 @@ namespace RawDataProcessor
                     return JsonConvert.DeserializeObject<Settings>(json);
                 }
             }
-            else
+
+            return new Settings
             {
-                return new Settings
-                {
-                    LastRunDate = new DateTimeOffset(2021, 9, 1, 0, 0, 0, TimeSpan.FromHours(0))
-                };
-            }
+                LastProcessingDate = DateTimeOffset.UtcNow.AddDays(-1)
+            };
         }
 
         public async Task SaveSettingsAsync(string storageConnectionString)
         {
             BlobServiceClient serviceClient = new BlobServiceClient(storageConnectionString);
             
-            var containerClient = serviceClient.GetBlobContainerClient("rawdataprocessor-configuration");
+            var containerClient = serviceClient.GetBlobContainerClient(ConfigurationContainerName);
 
             using (var ms = new MemoryStream())
             {
                 var json = JsonConvert.SerializeObject(this);
                 ms.Write(System.Text.Encoding.UTF8.GetBytes(json));
                 ms.Position = 0;
-                var blobClient = containerClient.GetBlobClient("settings.json");
+                var blobClient = containerClient.GetBlobClient(SettingsFileName);
                 await blobClient.UploadAsync(ms, overwrite: true);
             }
         }

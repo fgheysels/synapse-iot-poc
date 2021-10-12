@@ -1,23 +1,16 @@
-using Microsoft.Azure.Services.AppAuthentication;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Storage.Blobs;
 
 namespace RawDataProcessor
 {
     public class ProcessTelemetryFunction
     {
-
-        private readonly AzureServiceTokenProvider _serviceTokenProvider = new AzureServiceTokenProvider();
         private readonly IConfiguration _configuration;
 
         /// <summary>
@@ -30,16 +23,16 @@ namespace RawDataProcessor
 
         [FunctionName(nameof(ProcessTelemetryFunction))]
         public async Task Run(
-            [TimerTrigger("0 */2 * * * *", RunOnStartup = false)] TimerInfo myTimer, ILogger log)
+            [TimerTrigger("0 */2 * * * *", RunOnStartup = false)] TimerInfo timerTrigger, ILogger log)
         {
             var settings = await Settings.GetSettingsAsync(_configuration["SettingsStorage"]);
 
             var telemetryReader = new RawTelemetryReader(_configuration["RawTelemetryConnectionString"]);
 
-            var telemetryItems = await telemetryReader.ReadRawTelemetryRecordsSinceAsync(settings.LastRunDate);
+            var rawTelemetryItems = await telemetryReader.ReadRawTelemetryRecordsSinceAsync(settings.LastProcessingDate);
 
             var p = new TelemetryParquetWriter();
-            var parquetContents = p.CreateParquetContents(telemetryItems);
+            var parquetContents = p.CreateParquetContents(rawTelemetryItems);
 
             var blobUploader = new BlobUploader(_configuration["ParquetStorage"]);
 
@@ -52,8 +45,8 @@ namespace RawDataProcessor
 
             await Task.WhenAll(uploadTasks);
 
-            var dateOfLastProcessedItem = telemetryItems.Max(t => t.EnqueuedTimeUtc);
-            settings.LastRunDate = dateOfLastProcessedItem;
+            var dateOfLastProcessedItem = rawTelemetryItems.Max(t => t.EnqueuedTimeUtc);
+            settings.LastProcessingDate = dateOfLastProcessedItem;
             await settings.SaveSettingsAsync(_configuration["SettingsStorage"]);
         }
     }

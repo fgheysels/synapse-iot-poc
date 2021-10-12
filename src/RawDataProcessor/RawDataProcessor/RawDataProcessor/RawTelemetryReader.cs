@@ -8,21 +8,20 @@ using Newtonsoft.Json;
 
 namespace RawDataProcessor
 {
-    public class RawTelemetryReader
+    internal class RawTelemetryReader
     {
         private readonly AzureServiceTokenProvider _tokenProvider = new AzureServiceTokenProvider();
         private readonly string _connectionString;
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RawTelemetryReader"/> class.
         /// </summary>
-        public RawTelemetryReader(string connectionString)
+        internal RawTelemetryReader(string connectionString)
         {
             _connectionString = connectionString;
         }
         
-        public async Task< IEnumerable<TelemetryItem>> ReadRawTelemetryRecordsSinceAsync(DateTimeOffset enqueuedDatetime)
+        internal async Task< IEnumerable<TelemetryItem>> ReadRawTelemetryRecordsSinceAsync(DateTimeOffset fromDate)
         {
             var telemetryItems = new List<TelemetryItem>();
 
@@ -42,12 +41,12 @@ namespace RawDataProcessor
 
                 var command = new SqlCommand(query);
                 command.Connection = connection;
-                command.Parameters.Add("@p_Year", SqlDbType.Int).Value = enqueuedDatetime.Year;
-                command.Parameters.Add("@p_Month", SqlDbType.Int).Value = enqueuedDatetime.Month;
-                command.Parameters.Add("@p_Day", SqlDbType.Int).Value = enqueuedDatetime.Day;
-                command.Parameters.Add("@p_Hour", SqlDbType.Int).Value = enqueuedDatetime.Hour;
-                command.Parameters.Add("@p_Minute", SqlDbType.Int).Value = enqueuedDatetime.Minute;
-                command.Parameters.Add("@p_LastRunDate", SqlDbType.DateTimeOffset).Value = enqueuedDatetime;
+                command.Parameters.Add("@p_Year", SqlDbType.Int).Value = fromDate.Year;
+                command.Parameters.Add("@p_Month", SqlDbType.Int).Value = fromDate.Month;
+                command.Parameters.Add("@p_Day", SqlDbType.Int).Value = fromDate.Day;
+                command.Parameters.Add("@p_Hour", SqlDbType.Int).Value = fromDate.Hour;
+                command.Parameters.Add("@p_Minute", SqlDbType.Int).Value = fromDate.Minute;
+                command.Parameters.Add("@p_LastRunDate", SqlDbType.DateTimeOffset).Value = fromDate;
 
                 using (var reader = await command.ExecuteReaderAsync())
                 {

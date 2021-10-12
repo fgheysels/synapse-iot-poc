@@ -2,7 +2,7 @@ using System;
 
 namespace RawDataProcessor
 {
-    public class TelemetryItem
+    internal class TelemetryItem
     {
         public DateTimeOffset EnqueuedTimeUtc { get; set; }
         public TelemetryMessage Body { get; set; }

@@ -7,9 +7,14 @@ using Parquet.Data.Rows;
 
 namespace RawDataProcessor
 {
-    public class TelemetryParquetWriter
+    internal class TelemetryParquetWriter
     {
-        public IEnumerable<ParquetContent> CreateParquetContents(IEnumerable<TelemetryItem> items)
+        /// <summary>
+        /// Converts the TelemetryItem collection into a Parquet file format.
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns>A collection of <see cref="ParquetContent"/> instances.  Each instance contains an identifier and a Stream that contains the parquet-contents.</returns>
+        internal IEnumerable<ParquetContent> CreateParquetContents(IEnumerable<TelemetryItem> items)
         {
             // First, group the metrics on DeviceId, since we're going to write files per DeviceId and per Timestamp
             var groups = GroupTelemetry(items);
@@ -29,8 +34,8 @@ namespace RawDataProcessor
         private static Stream CreateParquetContentForGroup(IGrouping<int, TelemetryMessage> dayTelemetry)
         {
             // Define Parquet Schema first:
-            // Column1 = deviceId
-            // Column2 = timestamp
+            // 1st column = deviceId
+            // 2nd column = timestamp
             // For every Metric, we define a (double) column.
             var columnDefinitions = new List<DataField>();
 
@@ -55,6 +60,11 @@ namespace RawDataProcessor
 
             using (var parquetWriter = new ParquetWriter(schema, stream))
             {
+                // Parquet is a column-based format, so it allows you to define a column and write all contents
+                // for that column at once.
+                // However, in this case our information is row-based.  Therefore, define a a table and populate
+                // it with the appropriate contents and write the table at once.
+
                 Table t = new Table(schema);
 
                 foreach (var telemetry in dayTelemetry)
@@ -63,9 +73,13 @@ namespace RawDataProcessor
                     values.Add(telemetry.DeviceId);
                     values.Add(telemetry.Timestamp);
 
+                    // Populate each column for this row with the appropriate values. If we do not have a value
+                    // for that column, null must be added.
+
                     for (int i = 2; i < columnDefinitions.Count; i++)
                     {
                         var metric = telemetry.Metrics.FirstOrDefault(m => m.Tag == columnDefinitions[i].Name);
+                        
                         if (metric != null)
                         {
                             values.Add(metric.Value);
