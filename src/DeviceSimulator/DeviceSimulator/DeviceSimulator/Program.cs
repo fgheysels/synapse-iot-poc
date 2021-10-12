@@ -2,23 +2,24 @@
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Devices.Client;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace DeviceSimulator
 {
     class Program
     {
-        private const string DeviceConnectionString = "HostName=fg-datalake-poc.azure-devices.net;DeviceId=temperaturesimulator;SharedAccessKey=6wkbPu7QMPGuCGFruSH0RScPUAQ5JANYw77Xf+fvslw=";
-
         private static bool _stopApplication = false;
 
         static async Task Main(string[] args)
         {
+            var configuration = GetConfiguration();
+
             Console.CancelKeyPress += Console_CancelKeyPress;
 
             Console.WriteLine("Connecting to IoT Hub ...");
 
-            DeviceClient client = DeviceClient.CreateFromConnectionString(DeviceConnectionString);
+            DeviceClient client = DeviceClient.CreateFromConnectionString(configuration["ConnectionStrings:IoTHub"]);
 
             await client.OpenAsync();
 
@@ -40,6 +41,14 @@ namespace DeviceSimulator
             await client.CloseAsync();
 
             Console.WriteLine("Stopped.");
+        }
+
+        private static IConfiguration GetConfiguration()
+        {
+            return new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile("appsettings.local.json", optional: true)
+                .Build();
         }
 
         private static Message CreateDeviceMessageForTelemetryMessage(TelemetryMessage telemetry)

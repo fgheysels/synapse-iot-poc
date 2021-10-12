@@ -23,13 +23,23 @@ namespace RawDataProcessor
 
         [FunctionName(nameof(ProcessTelemetryFunction))]
         public async Task Run(
-            [TimerTrigger("0 */2 * * * *", RunOnStartup = false)] TimerInfo timerTrigger, ILogger log)
+            [TimerTrigger("0 */2 * * * *", RunOnStartup = false)] TimerInfo myTimer, ILogger log)
         {
             var settings = await Settings.GetSettingsAsync(_configuration["SettingsStorage"]);
 
             var telemetryReader = new RawTelemetryReader(_configuration["RawTelemetryConnectionString"]);
 
+            log.LogInformation($"Retrieving raw telemetry items since {settings.LastProcessingDate}");
+
             var rawTelemetryItems = await telemetryReader.ReadRawTelemetryRecordsSinceAsync(settings.LastProcessingDate);
+
+            log.LogInformation($"{rawTelemetryItems.LongCount()} telemetry items retrieved from storage");
+
+            if (rawTelemetryItems.Any() == false)
+            {
+                log.LogInformation("No telemetry data to process");
+                return;
+            }
 
             var p = new TelemetryParquetWriter();
             var parquetContents = p.CreateParquetContents(rawTelemetryItems);
@@ -40,10 +50,13 @@ namespace RawDataProcessor
 
             foreach (var parquetContent in parquetContents)
             {
+                log.LogInformation($"Uploading {parquetContent.Identifier} to storage");
                 uploadTasks.Add(blobUploader.UploadBlobAsync("parquet-contents", parquetContent.Identifier, parquetContent.Content));
             }
 
             await Task.WhenAll(uploadTasks);
+
+            log.LogInformation("Finished uploading parquet files to storage");
 
             var dateOfLastProcessedItem = rawTelemetryItems.Max(t => t.EnqueuedTimeUtc);
             settings.LastProcessingDate = dateOfLastProcessedItem;
@@ -70,7 +83,7 @@ namespace RawDataProcessor
             await containerClient.CreateIfNotExistsAsync();
 
             var blobClient = containerClient.GetBlobClient(blobName);
-            await blobClient.UploadAsync(content);
+            await blobClient.UploadAsync(content, overwrite: true);
         }
     }
 }

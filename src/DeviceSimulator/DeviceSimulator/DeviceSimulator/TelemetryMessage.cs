@@ -15,6 +15,5 @@ namespace DeviceSimulator
     {
         public string Tag { get; set; }
         public object Value { get; set; }
-
     }
 }
