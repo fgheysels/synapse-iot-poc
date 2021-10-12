@@ -32,22 +32,13 @@ resource iothub 'Microsoft.Devices/IotHubs@2021-07-01' = {
             connectionString: 'DefaultEndpointsProtocol=https;AccountName=${telemetrydatalake.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(telemetrydatalake.id, telemetrydatalake.apiVersion).keys[0].value}'
             containerName: 'climateboxes-rawdata'
             encoding: 'JSON'            
-            fileNameFormat: 'year={YYYY}/month={MM}/day={DD}/hour={HH}/minute={mm}/{iothub}_{partition}_{YYYY}{MM}{DD}{HH}{mm}.json'            
+            fileNameFormat: 'year={YYYY}/month={YYYY}{MM}/date={YYYY}{MM}{DD}/{iothub}_{partition}_{YYYY}{MM}{DD}{HH}{mm}.json'            
             maxChunkSizeInBytes: 104857600
             name: 'climateboxes-rawdata'
-            resourceGroup: resourceGroup().name
-            
+            resourceGroup: resourceGroup().name            
           }
         ]
-      }
-      
-      // fallbackRoute: {
-      //   condition: 'string'
-      //   endpointNames: [ 'string' ]
-      //   isEnabled: bool
-      //   name: 'string'
-      //   source: 'string'
-      // }
+      }      
       routes: [
         {
            condition: 'true'
@@ -62,8 +53,7 @@ resource iothub 'Microsoft.Devices/IotHubs@2021-07-01' = {
     }      
   }   
   dependsOn: [
-    telemetrydatalake    
-    // rawdataContainer
+    telemetrydatalake        
   ]
 } // End of IoT IotHubs
 
@@ -85,21 +75,15 @@ resource telemetrydatalake 'Microsoft.Storage/storageAccounts@2021-04-01' = {
 
   resource blobSvc 'blobServices' = {
     name: 'default'   // Always has value 'default'
-
-     resource rawdataContainer 'containers@2021-04-01' = {    
-       name: 'climateboxes-rawdata'      
-     }      
+    resource rawdataContainer 'containers@2021-04-01' = {    
+      name: 'climateboxes-rawdata'      
+    }   
+    resource parquetstorageContainer 'containers@2021-04-01' = {    
+      name: 'parquet-contents'      
+    }      
   }
   
-  // resource rawdataContainer 'containers@2021-04-01'  = {    
-  //   name: 'climateboxes-rawdata'      
-  // }
 }
-
-// resource rawdataContainer 'Microsoft.Storage/storageAccounts/containers@2021-04-01'  = {
-//    parent: telemetrydatalake
-//    name: 'climateboxes-rawdata'      
-// }
 
 resource rawdataprocessorfunctionapp_storageaccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   name: 'fgdatalakeprocfunstorage'
@@ -162,29 +146,32 @@ resource rawdataprocessorfunctionapp 'Microsoft.Web/sites@2021-02-01' = {
           value: 'DefaultEndpointsProtocol=https;AccountName=${rawdataprocessorfunctionapp_storageaccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(rawdataprocessorfunctionapp_storageaccount.id, rawdataprocessorfunctionapp_storageaccount.apiVersion).keys[0].value}'
         }
         {
-          'name': 'FUNCTIONS_EXTENSION_VERSION'
-          'value': '~3'
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~3'
         }
         {
-          'name': 'FUNCTIONS_WORKER_RUNTIME'
-          'value': 'dotnet'
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: 'dotnet'
         }   
         {
-          'name': 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          'value': appInsights.properties.InstrumentationKey
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: appInsights.properties.InstrumentationKey
         }     
+        {
+          name: 'SettingsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${rawdataprocessorfunctionapp_storageaccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(rawdataprocessorfunctionapp_storageaccount.id, rawdataprocessorfunctionapp_storageaccount.apiVersion).keys[0].value}'
+        }
+        {
+          name: 'RawTelemetryConnectionString'
+          value: ''
+        }
+        {
+          name: 'ParquetStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${telemetrydatalake.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(telemetrydatalake.id, telemetrydatalake.apiVersion).keys[0].value}'
+        }
       ]
       autoHealEnabled: false     
-      }
-      
-      // azureStorageAccounts: {}
-      // connectionStrings: [
-      //   {
-      //     connectionString: 'string'
-      //     name: 'string'
-      //     type: 'string'
-      //   }
-      // ]      
+      }    
   }
   dependsOn: [
     rawdataprocessorfunctionapp_storageaccount
