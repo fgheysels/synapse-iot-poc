@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
@@ -10,7 +12,6 @@ namespace RawDataProcessor
 {
     internal class RawTelemetryReader
     {
-        private readonly AzureServiceTokenProvider _tokenProvider = new AzureServiceTokenProvider();
         private readonly string _connectionString;
 
         /// <summary>
@@ -20,16 +21,14 @@ namespace RawDataProcessor
         {
             _connectionString = connectionString;
         }
-        
-        internal async Task< IEnumerable<TelemetryItem>> ReadRawTelemetryRecordsSinceAsync(DateTimeOffset fromDate)
+
+        internal async Task<IEnumerable<TelemetryItem>> ReadRawTelemetryRecordsSinceAsync(DateTimeOffset fromDate)
         {
             var telemetryItems = new List<TelemetryItem>();
 
             using (var connection = new SqlConnection(_connectionString))
             {
-                var token = await _tokenProvider.GetAccessTokenAsync("https://database.windows.net/");
-
-                connection.AccessToken = token;
+                connection.AccessToken = (await GetDatabaseAccessTokenAsync()).Token;
                 connection.Open();
 
                 string query = "SELECT * \n" +
@@ -58,6 +57,14 @@ namespace RawDataProcessor
             }
 
             return telemetryItems;
+        }
+
+        private static async Task<AccessToken> GetDatabaseAccessTokenAsync()
+        {
+            // Use DefaultAzureCredential instead of AzureServiceTokenProvider , as AzureServiceTokenProvider is part
+            // of the AppAuthentication library which will be deprecated in the near future.
+            // Azure.Identity is the new way to go.
+            return await new DefaultAzureCredential().GetTokenAsync(new TokenRequestContext(new[] { "https://database.windows.net/.default" }));
         }
     }
 }
