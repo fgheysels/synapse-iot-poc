@@ -19,7 +19,7 @@ namespace DeviceSimulator
 
             Console.WriteLine("Connecting to IoT Hub ...");
 
-            DeviceClient client = DeviceClient.CreateFromConnectionString(configuration["ConnectionStrings:IoTHub"]);
+            DeviceClient client = DeviceClient.CreateFromConnectionString(configuration["ConnectionStrings:SimulatorDevice"]);
 
             await client.OpenAsync();
 
