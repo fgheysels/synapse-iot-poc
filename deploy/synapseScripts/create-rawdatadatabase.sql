@@ -28,7 +28,7 @@ AS
     SELECT r.filepath(1) as device, *
     FROM OPENROWSET(
         BULK 'https://fgdatalakepocstorage.blob.core.windows.net/parquet-contents/device=*/*.parquet',
-        FORMAT = 'parquet'        
+        FORMAT = 'parquet'
     ) 
     with(
         [deviceId] VARCHAR(50),
