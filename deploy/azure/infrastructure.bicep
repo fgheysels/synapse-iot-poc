@@ -1,6 +1,7 @@
 targetScope = 'resourceGroup'
 
 param location string = 'westeurope'
+
 param iothub_name string = 'fg-datalakepoc-iothub'
 param iothub_sku_capacity int = 1
 param iothub_sku_name string = 'F1'
@@ -9,9 +10,7 @@ param datalake_name string = 'fgdatalakepocstorage'
 param datalake_sku_name string = 'Standard_RAGRS'
 
 param functionapp_name  string = 'fg-datalakepoc-rawdataprocessor'
-
 param functionapp_storageaccount_name string = 'fgdatalakeprocfunstorage'
-
 param functionapp_hostingplan_name  string = 'fg-datalakeprocessing-ai'
 
 param appinsights_name string = 'fg-datalakepoc-ai'
@@ -182,7 +181,7 @@ resource rawdataprocessorfunctionapp 'Microsoft.Web/sites@2021-02-01' = {
         }
         {
           name: 'RawTelemetryConnectionString'
-          value: ''
+          value: 'Data Source=${synapse.properties.connectivityEndpoints.sqlOnDemand}:Initial Catalog=climatebox_rawdata'
         }
         {
           name: 'ParquetStorage'
@@ -196,6 +195,7 @@ resource rawdataprocessorfunctionapp 'Microsoft.Web/sites@2021-02-01' = {
     rawdataprocessorfunctionapp_storageaccount
     rawdataprocessorfunctionapp_hostingplan
     appInsights
+    synapse
   ]
 }
 
