@@ -1,7 +1,0 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/src/RawDataProcessor/RawDataProcessor/RawDataProcessor/Properties/ServiceDependencies
-/src/DeviceSimulator/DeviceSimulator/DeviceSimulator/appsettings.local.json
-/src/DeviceSimulator/DeviceSimulator/.vs/DeviceSimulator/config/applicationhost.config
