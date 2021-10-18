@@ -181,7 +181,7 @@ resource rawdataprocessorfunctionapp 'Microsoft.Web/sites@2021-02-01' = {
         }
         {
           name: 'RawTelemetryConnectionString'
-          value: 'Data Source=${synapse.properties.connectivityEndpoints.sqlOnDemand}:Initial Catalog=climatebox_rawdata'
+          value: 'Data Source=${synapse.properties.connectivityEndpoints.sqlOnDemand},1433;Initial Catalog=climatebox_rawdata'
         }
         {
           name: 'ParquetStorage'
