@@ -2,6 +2,8 @@
 
 This project is a PoC to see how we can ingest received telemetry data directly into a Data Lake from IoT Hub, and query that data using Azure Synapse.
 
+Note that this is a PoC and is setup as such.  This means that shortcuts have been taken.  In a real-world/production scenario, sensitive information (such as connection-strings, passwords, ...) must be stored in KeyVault instead of putting them directly into the configuration.
+
 ## Getting started
 
 ### Deploy resources
@@ -9,7 +11,7 @@ This project is a PoC to see how we can ingest received telemetry data directly 
 First of all, some Azure resources must be created.  This project contains a bicep file which describes all the resources that are required.  This file can be found in the `deploy\azure` folder.
 
 If you inspect the `infrastructure.bicep` file, you'll notice that some parameters are declared which you can override to define the resource-names.  
-Most of the parameters have default values, however, there is one parameter which is required to be specified at deployment time: `synapse_admin_password`
+Most of the parameters have default values. However, there is one parameter which is required to be specified at deployment time: `synapse_admin_password`
 
 Create the required Azure resources by executing the following statement:
 
@@ -25,10 +27,7 @@ This deployment will also make sure that the Function App that is deployed and t
 
 Go to the Azure Portal and find the Azure Synapse resource that has been deployed in the previous step.
 
-Execute the scripts that are found in the `create-rawdatabase.sql` and `create-user.sql` files.
-
-    https://devblogs.microsoft.com/azure-sql/read-azure-storage-files-using-synapse-sql-external-tables/
-
+Execute the scripts that are found in the `create-rawdatabase.sql` and `create-user.sql` files via the Synapse Workspace.
 
 ## Running the solution
 
