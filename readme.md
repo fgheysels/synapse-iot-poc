@@ -2,7 +2,7 @@
 
 This project is a PoC to see how we can ingest received telemetry data directly into a Data Lake from IoT Hub, and query that data using Azure Synapse.
 
-Note that this is a PoC and is setup as such.  This means that shortcuts have been taken.  In a real-world/production scenario, sensitive information (such as connection-strings, passwords, ...) must be stored in KeyVault instead of putting them directly into the configuration.
+> Disclaimer: This is a PoC and is setup as such.  This means that shortcuts have been taken and this code should not be used in a production scenario.  In a real-world/production scenario, sensitive information (such as connection-strings, passwords, ...) must be stored in KeyVault instead of putting them directly into the configuration, deployment should be done via CI/CD pipelines, etc...
 
 ## Getting started
 
