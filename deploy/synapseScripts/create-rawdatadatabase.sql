@@ -1,4 +1,4 @@
-CREATE DATABASE climatebox_rawdata
+CREATE DATABASE db1
 GO
 
 -- TODO: make sure that the connectionstring to the datalake container that contains the raw messages is correct
