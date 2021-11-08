@@ -66,10 +66,60 @@ After some time, you'll see *.parquet files start appearing in the `parquet-cont
 
 ![Parquet storage](./static/img/parquet-storage.png)
 
-The parquet files that have been created, contain a table that group the telemetry values per timestamp.  Each row in the table represents a timestamp, 
+The parquet files that have been created, contain a table that group the telemetry values per timestamp.  Each row in the table represents a timestamp, each column represents a metric that is valid on that timestamp.
+
+If you want to run the Azure Function locally, be sure to create a `local.settings.json` file with these contents:
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "SettingsStorage": "<connectionstring to the rawdataprocessorfunctionapp_storageaccount storage account>",
+    "RawTelemetryConnectionString": "<connectionstring to the Synapse Database in the Serverless Pool f.i = Data Source=tcp:xxxxx-synapse-ondemand.sql.azuresynapse.net,1433; Initial Catalog=db1;>",
+    "ParquetStorage": "<connectionstring to the DataLake storage account>"
+  }
+}
+```
 
 ### Query Parquet files
 
-In an earlier step, the `parquetdata` view was created.
+In an earlier step, the `parquetdata` view was created.  Use this view to verify if the `RawDataProcessor` is creating queryable parquet files.
 
 ![Parquet Query](static/img/parquet-query.png)
+
+## Reporting via PowerBI
+
+- Open the PowerBI desktop application and create a new `DirectQuery` dataset for a SQL Server datasource.
+In the `Server` textbox, copy the address of the Synapse Serverless SQL Endpoint.
+In the `Database` textbox, put the name of the database that has been created via the `create-rawdatabase.sql` script.
+Use your Microsoft account to connect to the database that is hosted in Synapse.
+
+- On the next screen, specify that data must be loaded from the `parquetdata` view.
+
+- If everything goes well, you should now see the columns that are defined in the `parquetdata` view:
+
+  ![PowerBI fields](./static/img/powerbi-fields.png)
+
+- Add a LineChart to your report and drag the `timestamp` field to the `Axis` section
+  
+- Drag a metric value (for example `temp`) to the `Values` section
+
+- Specify a filter which limits the period for which we display values
+  
+- You'll see a graph which plots every value that exists for the selected timeframe:
+
+  ![Temperature per timestamp](./static/img/powerbi-temp-graph.png)
+
+- Aggregate the data by applying grouping on the `timestamp` field and display the average temperature by group:
+
+  ![Add new Grouping](./static/img/powerbi-timestamp-newgroup.png)
+
+  ![Grouping Details](./static/img/powerbi-timestamp-group.png)
+
+  ![Specify AVG aggregation](./static/img/powerbi-avg-temp.png)
+
+  The chart should update to something that looks like this:
+
+  ![Average temperature chart](./static/img/powerbi-avg-temp-chart.png)
