@@ -18,6 +18,7 @@ Create the required Azure resources by executing the following statement:
 ```azcli
 az deployment group create --subscription <subscriptionid> --resource-group <resourcegroupname> --template-file infrastructure.bicep --parameters synapse_admin_password=<your strong password>
 ```
+(It takes a while before this command finishes and all resources are provisioned)
 
 The password that you have specified, will be stored in the KeyVault resource that is deployed.
 
@@ -25,9 +26,12 @@ This deployment will also make sure that the Function App that is deployed and t
 
 ### Prepare the Synapse workspace
 
-Go to the Azure Portal and find the Azure Synapse resource that has been deployed in the previous step.
+Go to the Azure Portal and find the Azure Synapse resource that has been deployed in the previous step.  Open the Synapse Workspace via the *Workspace web URL* that can be found in the Overview blade.
 
-Execute the scripts that are found in the `create-rawdatabase.sql` and `create-user.sql` files via the Synapse Workspace.
+Execute the scripts that are found in the `create-rawdatabase.sql` and `create-user.sql` files via the Synapse Workspace.  Do this via the 'Develop' tab and make sure that you're connected to the 'Built-in' pool.
+
+> Make sure that the address of the DataLake is set correctly in those scripts.
+> Make sure that the name of the Function app is correctly set in the `create-user.sql` script.
 
 ## Running the solution
 
@@ -52,17 +56,17 @@ Verify if data is being received in IoT Hub:
 
 ![Number of messages received in IoT Hub](./static/img/iot-hub-number-of-messages-used.png)
 
-After a while, you should also that files are being created in the `climateboxes-rawdata` folder:
+After a while, you should also that files are being created in the `telemetry-rawdata` container that exists in the Data Lake storage account:
 
 ![Raw telemetry storage](./static/img/rawtelemetry-storage.png)
 
 ### Publish the RawDataProcessor solution to Azure
 
-Open the RawDataProcessor solution and publish the solution to the Function App that has been deployed in Azure.
+Open the RawDataProcessor solution and publish the solution to the (Linux) Function App that has been deployed in Azure.  This can easily be done from Visual Studio.NET but make sure that you select `linux-x64` as Target Runtime.
 
 Once deployed, the Function will start processing the raw telemetry that is dumped by IoT Hub in the datalake, and will convert it to parquet files that are also stored in the datalake.
 
-After some time, you'll see *.parquet files start appearing in the `parquet-contents` container:
+After some time, you'll see `*.parquet` files start appearing in the `parquet-contents` container:
 
 ![Parquet storage](./static/img/parquet-storage.png)
 
