@@ -43,11 +43,11 @@ resource iothub 'Microsoft.Devices/IotHubs@2021-07-01' = {
             authenticationType: 'keyBased'
             batchFrequencyInSeconds: 100
             connectionString: 'DefaultEndpointsProtocol=https;AccountName=${telemetrydatalake.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(telemetrydatalake.id, telemetrydatalake.apiVersion).keys[0].value}'
-            containerName: 'climateboxes-rawdata'
+            containerName: 'telemetry-rawdata'
             encoding: 'JSON'            
             fileNameFormat: 'year={YYYY}/month={YYYY}{MM}/date={YYYY}{MM}{DD}/{iothub}_{partition}_{YYYY}{MM}{DD}{HH}{mm}.json'            
             maxChunkSizeInBytes: 104857600
-            name: 'climateboxes-rawdata'
+            name: 'telemetry-rawdata'
             resourceGroup: resourceGroup().name            
           }
         ]
@@ -56,10 +56,10 @@ resource iothub 'Microsoft.Devices/IotHubs@2021-07-01' = {
         {
            condition: 'true'
            endpointNames: [ 
-             'climateboxes-rawdata' 
+             'telemetry-rawdata' 
            ]
            isEnabled: true
-           name: 'climateboxes-rawdata-route'
+           name: 'telemetry-rawdata-route'
            source: 'DeviceMessages'
         }
       ]
@@ -89,7 +89,7 @@ resource telemetrydatalake 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   resource blobSvc 'blobServices' = {
     name: 'default'   // Always has value 'default'
     resource rawdataContainer 'containers@2021-04-01' = {    
-      name: 'climateboxes-rawdata'   
+      name: 'telemetry-rawdata'   
       properties:{
         publicAccess: 'Container'
       }   

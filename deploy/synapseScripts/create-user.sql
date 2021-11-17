@@ -1,6 +1,6 @@
 -- Create a contained user in Synapse for an Azure Function
 -- https://docs.microsoft.com/en-us/azure/azure-sql/database/authentication-aad-configure?tabs=azure-powershell
--- The username has the same name as the Azure FunctionApp.
+-- The username must have the same name as the Azure FunctionApp.
 USE db1
 CREATE USER [fg-datalakepoc-rawdataprocessor] FROM EXTERNAL PROVIDER;
 
