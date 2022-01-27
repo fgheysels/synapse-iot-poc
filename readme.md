@@ -24,6 +24,10 @@ The password that you have specified, will be stored in the KeyVault resource th
 
 This deployment will also make sure that the Function App that is deployed and the deployer of the template, have the `Blob Contributor` role assigned to the Data Lake, as this is a requirement to be able to interact with the information that is stored in the Data Lake.
 
+> Note that the user which has deployed this bicep file will be added to the `Synapse Administrator` role in Synapse.  If you deploy this bicep template via a deployment pipeline, the Service Principal that is behind the service connection will be a `Synapse Administrator`.
+> If you have `roleAssignment/write` permissions, you can add other users or groups to the `Synapse Administrator` role as well.  This can be done via The Azure Synapse workspace Studio (under Management / Access control) or via [`az synapse role assignment`](https://docs.microsoft.com/en-us/cli/azure/synapse/role/assignment?view=azure-cli-latest) or via [`New-AzSynapseRoleAssignment`](https://docs.microsoft.com/en-us/powershell/module/az.synapse/new-azsynapseroleassignment?view=azps-7.1.0).
+> Be aware that in this case, you can only add other users or groups to the `Synapse Administrator` role.  Members of the `Synapse Administrator` role can add users or group to other Synapse roles.
+
 ### Prepare the Synapse workspace
 
 Go to the Azure Portal and find the Azure Synapse resource that has been deployed in the previous step.  Open the Synapse Workspace via the *Workspace web URL* that can be found in the Overview blade.
